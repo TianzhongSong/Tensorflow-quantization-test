@@ -1,6 +1,6 @@
 import argparse
 from pkl_reader import DataGenerator
-from utils.layers import *
+from layers import *
 import numpy as np
 import h5py
 
