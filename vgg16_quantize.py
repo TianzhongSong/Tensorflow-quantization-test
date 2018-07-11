@@ -20,7 +20,7 @@ if __name__ == '__main__':
     Y = tf.placeholder(tf.float32, [None, 1000])
 
     dg = DataGenerator('./data/val224_compressed.pkl', model='vgg', dtype='float32')
-    with tf.device('/cpu:0'):
+    with tf.device('/gpu:0'):
         logits = VGG16(X, weights, scales)
         prediction = tf.nn.softmax(logits)
 
@@ -30,9 +30,10 @@ if __name__ == '__main__':
         for im, label in dg.generator():
             out = sess.run(prediction, feed_dict={X: im})
             pred = tf.argmax(out, 1)
-            if pred == label:
+            pred = pred.eval()
+            if pred[0] == label:
                 acc += 1
-            if label in top5_acc(out.tolist()):
+            if label in top5_acc(out[0].tolist()):
                 acc_top5 += 1
         print('Top1 accuracy: {}'.format(acc / 50000))
         print('Top5 accuracy: {}'.format(acc_top5 / 50000))
