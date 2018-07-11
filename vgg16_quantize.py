@@ -14,14 +14,14 @@ def top5_acc(pred, k=5):
 
 
 if __name__ == '__main__':
-    weights = weight_loader('./weights/vgg16_weights_tf_dim_ordering_tf_kernels.h5', by_name=True)
+    weights, scales = weight_loader('./weights/vgg16_weights_tf_dim_ordering_tf_kernels.h5', by_name=True)
 
     X = tf.placeholder(tf.float32, [None, 224, 224, 3])
     Y = tf.placeholder(tf.float32, [None, 1000])
 
     dg = DataGenerator('./data/val224_compressed.pkl', model='vgg', dtype='float32')
     with tf.device('/cpu:0'):
-        logits = VGG16(X, weights)
+        logits = VGG16(X, weights, scales)
         prediction = tf.nn.softmax(logits)
 
     acc = 0.
