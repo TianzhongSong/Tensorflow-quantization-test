@@ -9,13 +9,11 @@ def quantize(x):
     return x, s
 
 
-def conv_2d(x, w, b=None, strides=1, padding='SAME', activation='relu'):
+def conv_2d(x, w, s, b=None, strides=1, padding='SAME', activation='relu'):
     x, sx = quantize(x)
-    w, sw = quantize(w)
     x = tf.cast(x, dtype=tf.float32)
-    w = tf.cast(w, dtype=tf.float32)
     x = tf.nn.conv2d(x, w, strides=[1, strides, strides, 1], padding=padding)
-    x = tf.multiply(x, tf.multiply(sx, sw))
+    x = tf.multiply(x, tf.multiply(sx, s))
     if b is not None:
         x = tf.nn.bias_add(x, b)
     if activation == 'relu':
@@ -23,13 +21,11 @@ def conv_2d(x, w, b=None, strides=1, padding='SAME', activation='relu'):
     return x
 
 
-def denselayer(x, w, b, activation=None):
+def denselayer(x, w, b, s, activation=None):
     x, sx = quantize(x)
-    w, sw = quantize(w)
     x = tf.cast(x, dtype=tf.float32)
-    w = tf.cast(w, dtype=tf.float32)
     x = tf.matmul(x, w)
-    x = tf.multiply(x, tf.multiply(sx, sw))
+    x = tf.multiply(x, tf.multiply(sx, s))
     x = tf.add(x, b)
     if activation == "relu":
         x = tf.nn.relu(x)
