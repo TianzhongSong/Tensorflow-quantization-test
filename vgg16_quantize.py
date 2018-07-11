@@ -23,17 +23,16 @@ if __name__ == '__main__':
     with tf.device('/gpu:0'):
         logits = VGG16(X, weights, scales)
         prediction = tf.nn.softmax(logits)
+        pred = tf.argmax(prediction, 1)
 
     acc = 0.
     acc_top5 = 0.
     with tf.Session() as sess:
         for im, label in dg.generator():
-            out = sess.run(prediction, feed_dict={X: im})
-            pred = tf.argmax(out, 1)
-            pred = pred.eval()
-            if pred[0] == label:
+            t1, t5 = sess.run([pred, prediction], feed_dict={X: im})
+            if t1[0] == label:
                 acc += 1
-            if label in top5_acc(out[0].tolist()):
+            if label in top5_acc(t5[0].tolist()):
                 acc_top5 += 1
         print('Top1 accuracy: {}'.format(acc / 50000))
         print('Top5 accuracy: {}'.format(acc_top5 / 50000))
