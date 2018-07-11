@@ -1,48 +1,84 @@
+from utils.layers import *
 import tensorflow as tf
 
+def VGG16(x, weights):
+    x = tf.reshape(x, shape=[-1, 224, 224, 3])
 
-def quantize(x):
-    abs_value = tf.abs(x)
-    vmax = tf.reduce_max(abs_value)
-    s = tf.divide(vmax, 127.)
-    x = tf.floor_div(x, s)
-    return x, s
+    # block 1
+    w = tf.constant(weights['block1_conv1_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block1_conv1_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
 
+    w = tf.constant(weights['block1_conv2_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block1_conv2_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+    x = maxpool_2d(x, k=2)
 
-def conv_2d(x, w, b=None, strides=1, padding='SAME', activation='relu'):
-    x, sx = quantize(x)
-    w, sw = quantize(w)
-    x = tf.cast(x, dtype=tf.float32)
-    w = tf.cast(w, dtype=tf.float32)
-    x = tf.nn.conv2d(x, w, strides=[1, strides, strides, 1], padding=padding)
-    x = tf.multiply(x, tf.multiply(sx, sw))
-    if b is not None:
-        x = tf.nn.bias_add(x, b)
-    if activation == 'relu':
-        x = tf.nn.relu(x)
+    # block2
+    w = tf.constant(weights['block2_conv1_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block2_conv1_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+
+    w = tf.constant(weights['block2_conv2_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block2_conv2_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+    x = maxpool_2d(x, k=2)
+
+    # block3
+    w = tf.constant(weights['block3_conv1_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block3_conv1_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+
+    w = tf.constant(weights['block3_conv2_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block3_conv2_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+
+    w = tf.constant(weights['block3_conv3_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block3_conv3_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+    x = maxpool_2d(x, k=2)
+
+    # block4
+    w = tf.constant(weights['block4_conv1_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block4_conv1_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+
+    w = tf.constant(weights['block4_conv2_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block4_conv2_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+
+    w = tf.constant(weights['block4_conv3_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block4_conv3_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+    x = maxpool_2d(x, k=2)
+
+    # block5
+    w = tf.constant(weights['block5_conv1_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block5_conv1_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+
+    w = tf.constant(weights['block5_conv2_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block5_conv2_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+
+    w = tf.constant(weights['block5_conv3_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['block5_conv3_b_1:0'], dtype=tf.float32)
+    x = conv_2d(x, w, b)
+    x = maxpool_2d(x, k=2)
+
+    # fc1
+    w = tf.constant(weights['fc1_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['fc1_b_1:0'], dtype=tf.float32)
+    x = tf.reshape(x, [-1, w.get_shape().as_list()[0]])
+    x = denselayer(x, w, b, activation='relu')
+
+    # fc2
+    w = tf.constant(weights['fc2_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['fc2_b_1:0'], dtype=tf.float32)
+    x = denselayer(x, w, b, activation='relu')
+
+    # fc3
+    w = tf.constant(weights['predictions_W_1:0'], dtype=tf.float32)
+    b = tf.constant(weights['predictions_b_1:0'], dtype=tf.float32)
+    x = denselayer(x, w, b)
     return x
-
-
-def denselayer(x, w, b, activation=None):
-    x, sx = quantize(x)
-    w, sw = quantize(w)
-    x = tf.cast(x, dtype=tf.float32)
-    w = tf.cast(w, dtype=tf.float32)
-    x = tf.matmul(x, w)
-    x = tf.multiply(x, tf.multiply(sx, sw))
-    x = tf.add(x, b)
-    if activation == "relu":
-        x = tf.nn.relu(x)
-    return x
-
-
-def maxpool_2d(x, k=2, padding='SAME'):
-    # MaxPool2D wrapper
-    return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, k, k, 1],
-                          padding=padding)
-
-
-def avgpool_2d(x, k=2, padding='SAME'):
-    # AvgPool2D wrapper
-    return tf.nn.avg_pool(x, ksize=[1, k, k, 1], strides=[1, k, k,1],
-                          padding=padding)
