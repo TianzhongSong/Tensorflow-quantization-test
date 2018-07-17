@@ -1,0 +1,32 @@
+model:mobilenet
+alpha:0.25
+Top1 accuracy: 0.34848
+Top5 accuracy: 0.58956
+model:vgg
+Top1 accuracy: 0.7066
+Top5 accuracy: 0.89714
+model:resnet
+Top1 accuracy: 0.74004
+Top5 accuracy: 0.91574
+model:inception
+Top1 accuracy: 0.75982
+Top5 accuracy: 0.92658
+model:xception
+Top1 accuracy: 0.7672
+Top5 accuracy: 0.93204
+model:mobilenet
+alpha:1.0
+Top1 accuracy: 0.64294
+Top5 accuracy: 0.85656
+model:mobilenet
+alpha:0.75
+Top1 accuracy: 0.6367
+Top5 accuracy: 0.84952
+model:mobilenet
+alpha:0.5
+Top1 accuracy: 0.5723
+Top5 accuracy: 0.80522
+model:mobilenet
+alpha:0.25
+Top1 accuracy: 0.34848
+Top5 accuracy: 0.58956
