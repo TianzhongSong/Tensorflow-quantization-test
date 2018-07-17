@@ -48,6 +48,21 @@ def depthwise_conv2d(x, w, b=None, strides=1, padding='SAME', activation=''):
     return x
 
 
+def separable_conv2d(x, dw, pw, strides=1, padding='SAME', activation=''):
+    x, sx = quantize(x)
+    dw, sd = quantize(dw)
+    pw, sp = quantize(pw)
+    x = tf.cast(x, dtype=tf.float32)
+    dw = tf.cast(dw, dtype=tf.float32)
+    pw = tf.cast(pw, dtype=tf.float32)
+    x = tf.nn.separable_conv2d(x, dw, pw, strides=[1, strides, strides, 1], padding=padding)
+    # multiply scales
+    x = tf.multiply(x, tf.multiply(sx, tf.multiply(sd, sp)))
+    if activation == 'relu':
+        x = tf.nn.relu(x)
+    return x
+
+
 def denselayer(x, w, b, activation=''):
     x, sx = quantize(x)
     w, sw = quantize(w)
