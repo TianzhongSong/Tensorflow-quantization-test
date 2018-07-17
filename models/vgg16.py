@@ -81,4 +81,4 @@ def VGG16(x, weights):
     w = tf.constant(weights['predictions_W_1:0'], dtype=tf.float32)
     b = tf.constant(weights['predictions_b_1:0'], dtype=tf.float32)
     x = denselayer(x, w, b)
-    return x, x1
+    return x
