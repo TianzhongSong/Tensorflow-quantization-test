@@ -43,6 +43,7 @@ class DataGenerator(object):
     def preprocessing(im, model='vgg', dtype='float32'):
         dtype = np.float16 if dtype == 'float16' else np.float32
         im = im.astype(dtype)
+        im = np.expand_dims(im, axis=0)
         if model in ['vgg', 'resnet', 'squeezenet']:
             im[..., 0] -= 103.939
             im[..., 1] -= 116.779
