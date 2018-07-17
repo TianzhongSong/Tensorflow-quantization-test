@@ -126,4 +126,4 @@ def ResNet50(x, weights):
     b = tf.constant(weights['fc1000_b:0'], dtype=tf.float32)
     x = tf.reshape(x, [-1, w.get_shape().as_list()[0]])
     x = denselayer(x, w, b)
-    return x, x1
+    return x
