@@ -61,6 +61,6 @@ if __name__ == '__main__':
                 acc += 1
             if label in top5_acc(t5[0].tolist()):
                 acc_top5 += 1
-            print(t1[0], label)
+            #print(t1[0], label)
         print('Top1 accuracy: {}'.format(acc / 50000))
         print('Top5 accuracy: {}'.format(acc_top5 / 50000))
