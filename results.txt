@@ -30,3 +30,6 @@ model:mobilenet
 alpha:0.25
 Top1 accuracy: 0.34848
 Top5 accuracy: 0.58956
+model:squeezenet
+Top1 accuracy: 0.519
+Top5 accuracy: 0.76032
