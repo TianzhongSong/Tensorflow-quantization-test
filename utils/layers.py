@@ -34,13 +34,13 @@ def conv_2d(x, w, b=None, strides=1, padding='SAME', activation=''):
 
 
 def depthwise_conv2d(x, w, b=None, strides=1, padding='SAME', activation=''):
-    x, sx = quantize(x)
-    w, sw = quantize(w)
-    x = tf.cast(x, dtype=tf.float32)
-    w = tf.cast(w, dtype=tf.float32)
+    # x, sx = quantize(x)
+    #vw, sw = quantize(w)
+    #x = tf.cast(x, dtype=tf.float32)
+    #w = tf.cast(w, dtype=tf.float32)
     x = tf.nn.depthwise_conv2d(x, w, strides=[1, strides, strides, 1], padding=padding)
     # multiply scales
-    x = tf.multiply(x, tf.multiply(sx, sw))
+    #x = tf.multiply(x, tf.multiply(sx, sw))
     if b is not None:
         x = tf.nn.bias_add(x, b)
     if activation == 'relu':
