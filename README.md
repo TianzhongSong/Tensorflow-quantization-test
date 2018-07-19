@@ -16,7 +16,7 @@ h5py
 
 ### Quantization Method
 
-Simply map |max| to 127.
+Simply map |max| to 127. Reference from [TensorRT](http://on-demand.gputechconf.com/gtc/2017/presentation/s7310-8-bit-inference-with-tensorrt.pdf).
 
 ![quantize method](https://github.com/TianzhongSong/Tensorflow-quantization-test/blob/master/figures/quantize.PNG)
 
@@ -47,6 +47,10 @@ An example for testing resnet50.
 
     python run_image_classification.py --model='resnet' --weights='resnet50_weights.h5'
 
+An example for testing mobilenet with a width multiplier 1.0.
+
+    python run_image_classification.py --model='mobilenet' --weights='mobilenet_1_0_224_tf.h5' --alpha=1.0
+    
 ### ImageNet Datatset
 
 [ImageNet val data](http://ml.cs.tsinghua.edu.cn/~chenxi/dataset/val224_compressed.pkl) 
@@ -55,7 +59,9 @@ sincerely thanks to aaron-xichen for sharing this processed ImageNet val data.
 
 ### Results
 
-|Model                  | float32              |float16                 |diff                  |
+Notice: Only quantize pointwise convolution in MobileNet, quantize depthwise convolution will suffer significant accuracy loss.
+
+|Model                  | float32              |quantize (int8)                 |diff                  |
 | :-------------------: |:--------------------:|:---------------------: |:-----------------------:|
 |[VGG16](https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels.h5)                 | 0.70786/0.89794      | 0.7066/0.89714         | -0.00126/-0.0008   |
 |[ResNet50](https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_tf_dim_ordering_tf_kernels.h5)               | 0.74366/0.91806      | 0.74004/0.91574        | -0.00362/-0.00232    |
@@ -66,6 +72,15 @@ sincerely thanks to aaron-xichen for sharing this processed ImageNet val data.
 |[MobileNet-7-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_7_5_224_tf.h5)          | 0.67726/0.87838      | 0.64654/0.85646         |   -0.03072/-0.02192    |
 |[MobileNet-5-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_5_0_224_tf.h5)          | 0.6352/0.85006       | 0.59438/0.8217        |   -0.04082/-0.02836   |
 |[MobileNet-2-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_224_tf.h5)          | 0.5134/0.75546       | 0.46506/0.71176         |  -0.04834/-0.0437   |
+
+Quantize depthwise convolution and pointwise convolution in MobileNet simultaneously. Obviously, model has a significant accuracy loss.
+
+|Model                  | float32              |quantize (int8)                 |diff                  |
+| :-------------------: |:--------------------:|:---------------------: |:-----------------------:|
+|[MobileNet-1-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_1_0_224_tf.h5)          | 0.69856/0.89174      | 0.64294/0.85656          |   -0.05562/-0.03518    |
+|[MobileNet-7-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_7_5_224_tf.h5)          | 0.67726/0.87838      | 0.6367/0.84952         |   -0.04056/-0.02886    |
+|[MobileNet-5-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_5_0_224_tf.h5)          | 0.6352/0.85006       | 0.5723/0.80522        |   -0.0629/-0.04484   |
+|[MobileNet-2-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_224_tf.h5)          | 0.5134/0.75546       | 0.34848/0.58956         |  -0.16492/-0.1659   |
 
 ## Semantic Segmentation Part
 
