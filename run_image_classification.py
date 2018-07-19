@@ -37,7 +37,7 @@ if __name__ == '__main__':
     Y = tf.placeholder(tf.float32, [None, 1000])
 
     dg = DataGenerator('./data/val224_compressed.pkl', model=args.model, dtype='float32')
-    with tf.device('/cpu:0'):
+    with tf.device('/gpu:0'):
         if args.model == 'resnet':
             logits = resnet50.ResNet50(X, weights)
         elif args.model == 'inception':
