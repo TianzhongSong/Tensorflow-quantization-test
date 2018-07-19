@@ -59,7 +59,9 @@ sincerely thanks to aaron-xichen for sharing this processed ImageNet val data.
 
 ### Results
 
-Notice: Only quantize pointwise convolution in MobileNet, quantize depthwise convolution will suffer significant accuracy loss.
+Notice: Only quantize pointwise convolution in MobileNet, quantize depthwise convolution will suffers significant accuracy loss.
+
+Whatever, MobileNets still suffer significant accuracy loss.
 
 |Model                  | float32              |quantize (int8)                 |diff                  |
 | :-------------------: |:--------------------:|:---------------------: |:-----------------------:|
@@ -68,7 +70,7 @@ Notice: Only quantize pointwise convolution in MobileNet, quantize depthwise con
 |[Inceptionv3](https://github.com/fchollet/deep-learning-models/releases/download/v0.5/inception_v3_weights_tf_dim_ordering_tf_kernels.h5)            | 0.76518/0.92854      | 0.75982/0.92658          | -0.00536/0.00196    |
 |[Xception](https://github.com/fchollet/deep-learning-models/releases/download/v0.4/xception_weights_tf_dim_ordering_tf_kernels.h5)               | 0.77446/0.93618      | 0.7672/0.93204        |  -0.00726/-0.00414    |
 |[Squeezenet](https://github.com/rcmalli/keras-squeezenet/releases/download/v1.0/squeezenet_weights_tf_dim_ordering_tf_kernels.h5)             | 0.52294/0.76312      | 0.519/0.76032        |   -0.00394/-0.0028     |
-|[MobileNet-1-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_1_0_224_tf.h5)          | 0.69856/0.89174      | 0.6966/0.8898          |   -0.00196/-0.00194    |
+|[MobileNet-1-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_1_0_224_tf.h5)          | 0.69856/0.89174      | 0.65254/0.86164          |   -0.04602/-0.0301    |
 |[MobileNet-7-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_7_5_224_tf.h5)          | 0.67726/0.87838      | 0.64654/0.85646         |   -0.03072/-0.02192    |
 |[MobileNet-5-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_5_0_224_tf.h5)          | 0.6352/0.85006       | 0.59438/0.8217        |   -0.04082/-0.02836   |
 |[MobileNet-2-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_224_tf.h5)          | 0.5134/0.75546       | 0.46506/0.71176         |  -0.04834/-0.0437   |
