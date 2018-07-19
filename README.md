@@ -37,7 +37,7 @@ For example, import pre-trained weights into a convolution layer (first convolut
 ![workflow](https://github.com/TianzhongSong/Tensorflow-quantization-test/blob/master/figures/workflow.PNG)
 
 I have built VGG16, ResNet50, InceptionV3, Xception, MobileNet, Squeezenet.
-These models are tested successfully. For detail see [models dirtory](https://github.com/TianzhongSong/Tensorflow-quantization-test/tree/master/models)
+These models are tested successfully. For detail see [models directory](https://github.com/TianzhongSong/Tensorflow-quantization-test/tree/master/models)
 
 ## Image Classification Part
 
