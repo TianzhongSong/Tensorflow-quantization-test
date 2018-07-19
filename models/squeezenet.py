@@ -51,7 +51,7 @@ def SqueezeNet(x, weights):
     w, b = get_weights(weights, 'conv10_W:0', 'conv10_b:0')
     x = conv_2d(x, w, b, strides=1, padding='VALID', activation='relu')
 
-    x = avgpool_2d(x, k=7)
+    x = avgpool_2d(x, k=13)
     x = tf.reshape(x, shape=[-1, 1000])
     return x
 
