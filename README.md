@@ -45,11 +45,11 @@ These models are tested successfully. For detail see [models directory](https://
 
 An example for testing resnet50.
 
-    python run_image_classification.py --model='resnet' --weights='resnet50_weights.h5'
+    python eval_image_classification.py --model='resnet'
 
 An example for testing mobilenet with a width multiplier 1.0.
 
-    python run_image_classification.py --model='mobilenet' --weights='mobilenet_1_0_224_tf.h5' --alpha=1.0
+    python eval_image_classification.py --model='mobilenet' --alpha=1.0
     
 ### ImageNet Datatset
 
