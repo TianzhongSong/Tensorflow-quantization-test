@@ -3,8 +3,17 @@ from models import resnet50, vgg16, inception_v3, mobilenet, xception, squeezene
 from utils.load_weights import weight_loader
 from pkl_reader import DataGenerator
 import tensorflow as tf
-import numpy as np
 
+weights = {'vgg': 'vgg16_weights_tf_dim_ordering_tf_kernels.h5',
+           'resnet': 'resnet50_weights_tf_dim_ordering_tf_kernels.h5',
+           'inception': 'inception_v3_weights_tf_dim_ordering_tf_kernels.h5',
+           'xception': 'xception_weights_tf_dim_ordering_tf_kernels.h5',
+           'squeezenet': 'squeezenet_weights_tf_dim_ordering_tf_kernels.h5',
+           'mobilenet_1.0': 'mobilenet_1_0_224_tf.h5',
+           'mobilenet_0.75': 'mobilenet_7_5_224_tf.h5',
+           'mobilenet_0.5': 'mobilenet_5_0_224_tf.h5',
+           'mobilenet_0.25': 'mobilenet_2_5_224_tf.h5'
+           }
 
 def top5_acc(pred, k=5):
     Inf = 0.
@@ -17,13 +26,13 @@ def top5_acc(pred, k=5):
 
 if __name__ == '__main__':
     parse = argparse.ArgumentParser(description='command for testing keras model with fp16 and fp32')
-    parse.add_argument('--model', type=str, default='squeezenet', help='support vgg16, resnet50, densenet121, \
-         inceptionv3, inception_resnet, xception, mobilenet, squeezenet')
-    parse.add_argument('--weights', type=str, default='./weights/squeezenet_weights_tf_dim_ordering_tf_kernels.h5')
+    parse.add_argument('--model', type=str, default='mobilenet', help='support vgg, resnet, densenet, \
+         inception, inception_resnet, xception, mobilenet, squeezenet')
     parse.add_argument('--alpha', type=float, default=0.25, help='alpha for mobilenet')
     args = parse.parse_args()
 
-    weights = weight_loader(args.weights)
+    model_name = args.model if args.model != 'mobilenet' else args.model + '_' + str(args.alpha)
+    weights = weight_loader('./weights/{}'.format(model_name))
 
     if args.model in ['vgg', 'resnet', 'mobilenet']:
         X = tf.placeholder(tf.float32, [None, 224, 224, 3])
@@ -37,7 +46,7 @@ if __name__ == '__main__':
     Y = tf.placeholder(tf.float32, [None, 1000])
 
     dg = DataGenerator('./data/val224_compressed.pkl', model=args.model, dtype='float32')
-    with tf.device('/gpu:0'):
+    with tf.device('/cpu:0'):
         if args.model == 'resnet':
             logits = resnet50.ResNet50(X, weights)
         elif args.model == 'inception':
@@ -63,6 +72,5 @@ if __name__ == '__main__':
                 acc += 1
             if label in top5_acc(t5[0].tolist()):
                 acc_top5 += 1
-            # print(t1[0], label)
         print('Top1 accuracy: {}'.format(acc / 50000))
         print('Top5 accuracy: {}'.format(acc_top5 / 50000))
