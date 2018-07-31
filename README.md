@@ -59,30 +59,162 @@ sincerely thanks to aaron-xichen for sharing this processed ImageNet val data.
 
 ### Results
 
-Notice: Only quantize pointwise convolution in MobileNet, quantize depthwise convolution will suffers significant accuracy loss.
+Notice: MobileNets suffer significant accuracy loss.
 
-Whatever, MobileNets still suffer significant accuracy loss.
+<table width="95%">
+  <tr>
+    <td></td>
+    <td colspan=2 align=center>float32</td>
+    <td colspan=2 align=center>quantized</td>
+    <td colspan=2 align=center>diff</td>
+  </tr>
+  <tr>
+    <td align=center><b>Model</td>
+    <td align=center>Top1 acc</td>
+    <td align=center>Top5 acc</td>
+    <td align=center>Top1 acc</td>
+    <td align=center>Top5 acc</td>
+    <td align=center>Top1 acc</td>
+    <td align=center>Top5 acc</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels.h5">VGG16</a></td>
+    <td align=center width="10%"><b>0.70786</td>
+    <td align=center width="10%"><b>0.89794</td>
+    <td align=center width="10%"><b>0.7066</td>
+    <td align=center width="10%"><b>0.89714</td>
+    <td align=center width="10%"><b>-0.00126</td>
+    <td align=center width="10%"><b>-0.0008</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_tf_dim_ordering_tf_kernels.h5">ResNet50</a></td>
+    <td align=center width="10%"><b>0.74366</td>
+    <td align=center width="10%"><b>0.91806</td>
+    <td align=center width="10%"><b>0.74004</td>
+    <td align=center width="10%"><b>0.91574</td>
+    <td align=center width="10%"><b>-0.00362</td>
+    <td align=center width="10%"><b>-0.00232</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.5/inception_v3_weights_tf_dim_ordering_tf_kernels.h5">Inceptionv3</a></td>
+    <td align=center width="10%"><b>0.76518</td>
+    <td align=center width="10%"><b>0.92854</td>
+    <td align=center width="10%"><b>0.75982</td>
+    <td align=center width="10%"><b>0.92658</td>
+    <td align=center width="10%"><b>-0.00536</td>
+    <td align=center width="10%"><b>-0.00196</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.4/xception_weights_tf_dim_ordering_tf_kernels.h5">Xception</a></td>
+    <td align=center width="10%"><b>0.77446</td>
+    <td align=center width="10%"><b>0.93618</td>
+    <td align=center width="10%"><b>0.7672</td>
+    <td align=center width="10%"><b>0.93204</td>
+    <td align=center width="10%"><b>-0.00726</td>
+    <td align=center width="10%"><b>-0.00414</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/rcmalli/keras-squeezenet/releases/download/v1.0/squeezenet_weights_tf_dim_ordering_tf_kernels.h5">Squeezenet</a></td>
+    <td align=center width="10%"><b>0.52294</td>
+    <td align=center width="10%"><b>0.76312</td>
+    <td align=center width="10%"><b>0.519</td>
+    <td align=center width="10%"><b>0.76032</td>
+    <td align=center width="10%"><b>-0.00394</td>
+    <td align=center width="10%"><b>-0.0028</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_1_0_224_tf.h5">MobileNet-1-0</a></td>
+    <td align=center width="10%"><b>0.69856</td>
+    <td align=center width="10%"><b>0.89174</td>
+    <td align=center width="10%"><b>0.64294</td>
+    <td align=center width="10%"><b>0.85656</td>
+    <td align=center width="10%"><b>-0.05562</td>
+    <td align=center width="10%"><b>-0.03518</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_7_5_224_tf.h5">MobileNet-7-5</a></td>
+    <td align=center width="10%"><b>0.67726</td>
+    <td align=center width="10%"><b>0.87838</td>
+    <td align=center width="10%"><b>0.6367</td>
+    <td align=center width="10%"><b>0.84952</td>
+    <td align=center width="10%"><b>-0.04056</td>
+    <td align=center width="10%"><b>-0.02886</td>
+    </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_5_0_224_tf.h5">MobileNet-5-0</a></td>
+    <td align=center width="10%"><b>0.6352</td>
+    <td align=center width="10%"><b>0.85006</td>
+    <td align=center width="10%"><b>0.5723</td>
+    <td align=center width="10%"><b>0.80522</td>
+    <td align=center width="10%"><b>-0.0629</td>
+    <td align=center width="10%"><b>-0.04484</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_224_tf.h5">MobileNet-2-5</a></td>
+    <td align=center width="10%"><b>0.5134</td>
+    <td align=center width="10%"><b>0.75546</td>
+    <td align=center width="10%"><b>0.34848</td>
+    <td align=center width="10%"><b>0.58956</td>
+    <td align=center width="10%"><b>-0.16492</td>
+    <td align=center width="10%"><b>-0.1659</td>
+  </tr>
+</table>
 
-|Model                  | float32              |quantize (int8)                 |diff                  |
-| :-------------------: |:--------------------:|:---------------------: |:-----------------------:|
-|[VGG16](https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels.h5)                 | 0.70786/0.89794      | 0.7066/0.89714         | -0.00126/-0.0008   |
-|[ResNet50](https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_tf_dim_ordering_tf_kernels.h5)               | 0.74366/0.91806      | 0.74004/0.91574        | -0.00362/-0.00232    |
-|[Inceptionv3](https://github.com/fchollet/deep-learning-models/releases/download/v0.5/inception_v3_weights_tf_dim_ordering_tf_kernels.h5)            | 0.76518/0.92854      | 0.75982/0.92658          | -0.00536/0.00196    |
-|[Xception](https://github.com/fchollet/deep-learning-models/releases/download/v0.4/xception_weights_tf_dim_ordering_tf_kernels.h5)               | 0.77446/0.93618      | 0.7672/0.93204        |  -0.00726/-0.00414    |
-|[Squeezenet](https://github.com/rcmalli/keras-squeezenet/releases/download/v1.0/squeezenet_weights_tf_dim_ordering_tf_kernels.h5)             | 0.52294/0.76312      | 0.519/0.76032        |   -0.00394/-0.0028     |
-|[MobileNet-1-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_1_0_224_tf.h5)          | 0.69856/0.89174      | 0.65254/0.86164          |   -0.04602/-0.0301    |
-|[MobileNet-7-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_7_5_224_tf.h5)          | 0.67726/0.87838      | 0.64654/0.85646         |   -0.03072/-0.02192    |
-|[MobileNet-5-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_5_0_224_tf.h5)          | 0.6352/0.85006       | 0.59438/0.8217        |   -0.04082/-0.02836   |
-|[MobileNet-2-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_224_tf.h5)          | 0.5134/0.75546       | 0.46506/0.71176         |  -0.04834/-0.0437   |
+Only quantize pointwise convolution in MobileNet
 
-Quantize depthwise convolution and pointwise convolution in MobileNet simultaneously. Obviously, model has a significant accuracy loss.
-
-|Model                  | float32              |quantize (int8)                 |diff                  |
-| :-------------------: |:--------------------:|:---------------------: |:-----------------------:|
-|[MobileNet-1-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_1_0_224_tf.h5)          | 0.69856/0.89174      | 0.64294/0.85656          |   -0.05562/-0.03518    |
-|[MobileNet-7-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_7_5_224_tf.h5)          | 0.67726/0.87838      | 0.6367/0.84952         |   -0.04056/-0.02886    |
-|[MobileNet-5-0](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_5_0_224_tf.h5)          | 0.6352/0.85006       | 0.5723/0.80522        |   -0.0629/-0.04484   |
-|[MobileNet-2-5](https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_224_tf.h5)          | 0.5134/0.75546       | 0.34848/0.58956         |  -0.16492/-0.1659   |
+<table width="95%">
+  <tr>
+    <td></td>
+    <td colspan=2 align=center>float32</td>
+    <td colspan=2 align=center>quantized</td>
+    <td colspan=2 align=center>diff</td>
+  </tr>
+  <tr>
+    <td align=center><b>Model</td>
+    <td align=center>Top1 acc</td>
+    <td align=center>Top5 acc</td>
+    <td align=center>Top1 acc</td>
+    <td align=center>Top5 acc</td>
+    <td align=center>Top1 acc</td>
+    <td align=center>Top5 acc</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_1_0_224_tf.h5">MobileNet-1-0</a></td>
+    <td align=center width="10%"><b>0.69856</td>
+    <td align=center width="10%"><b>0.89174</td>
+    <td align=center width="10%"><b>0.65254</td>
+    <td align=center width="10%"><b>0.86164</td>
+    <td align=center width="10%"><b>-0.04602</td>
+    <td align=center width="10%"><b>-0.0301</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_7_5_224_tf.h5">MobileNet-7-5</a></td>
+    <td align=center width="10%"><b>0.67726</td>
+    <td align=center width="10%"><b>0.87838</td>
+    <td align=center width="10%"><b>0.64654</td>
+    <td align=center width="10%"><b>0.85646</td>
+    <td align=center width="10%"><b>-0.03072</td>
+    <td align=center width="10%"><b>-0.02192</td>
+    </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_5_0_224_tf.h5">MobileNet-5-0</a></td>
+    <td align=center width="10%"><b>0.6352</td>
+    <td align=center width="10%"><b>0.85006</td>
+    <td align=center width="10%"><b>0.59438</td>
+    <td align=center width="10%"><b>0.8217</td>
+    <td align=center width="10%"><b>-0.04082</td>
+    <td align=center width="10%"><b>-0.02836</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b><a href="https://github.com/fchollet/deep-learning-models/releases/download/v0.6/mobilenet_2_5_224_tf.h5">MobileNet-2-5</a></td>
+    <td align=center width="10%"><b>0.5134</td>
+    <td align=center width="10%"><b>0.75546</td>
+    <td align=center width="10%"><b>0.46506</td>
+    <td align=center width="10%"><b>0.71176</td>
+    <td align=center width="10%"><b>-0.04834</td>
+    <td align=center width="10%"><b>-0.0437</td>
+  </tr>
+</table>
 
 ## Semantic Segmentation Part
 
