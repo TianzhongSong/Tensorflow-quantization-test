@@ -65,7 +65,7 @@ Notice: MobileNets suffer significant accuracy loss.
   <tr>
     <td></td>
     <td colspan=2 align=center>float32</td>
-    <td colspan=2 align=center>quantized</td>
+    <td colspan=2 align=center>quantized(int8)</td>
     <td colspan=2 align=center>diff</td>
   </tr>
   <tr>
@@ -166,7 +166,7 @@ Only quantize pointwise convolution in MobileNet
   <tr>
     <td></td>
     <td colspan=2 align=center>float32</td>
-    <td colspan=2 align=center>quantized</td>
+    <td colspan=2 align=center>quantized(int8)</td>
     <td colspan=2 align=center>diff</td>
   </tr>
   <tr>
