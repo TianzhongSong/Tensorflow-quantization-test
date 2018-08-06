@@ -7,11 +7,6 @@ import argparse
 import tensorflow as tf
 
 
-weights = {'unet_seg': 'vgg16_weights_tf_dim_ordering_tf_kernels.h5',
-           'unet_parse': 'resnet50_weights_tf_dim_ordering_tf_kernels.h5'
-           }
-
-
 def compute_iou(gt, pt):
     intersection = 0
     union = 0
@@ -42,7 +37,7 @@ if __name__ == '__main__':
 
     X = tf.placeholder(tf.float32, [None, 256, 256, 3])
     Y = tf.placeholder(tf.float32, [None, 1000, args.nClasses])
-    with tf.device('/cpu:0'):
+    with tf.device('/gpu:0'):
         if args.model == 'unet':
             logits = unet.Unet(X, weights, n_classes, input_height=input_height, input_width=input_width)
         else:
@@ -66,7 +61,7 @@ if __name__ == '__main__':
                 pt_img = np.zeros_like(y)
                 gt_img[:] += (gt[:] == c).astype('uint8')
                 pt_img[:] += (gt[:] == c).astype('uint8')
-                if (pt_img == gt_img).all():
+                if not (pt_img == np.zeros_like(pt_img)).all():
                     iou[c - 1] += compute_iou(pt_img[0], gt_img[0])
                     count[c - 1] += 1
         miou = 0.
