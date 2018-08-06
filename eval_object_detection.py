@@ -1,6 +1,6 @@
 # coding=utf8
 from models.ssd300 import ssd_300
-from models.keras_ssd512 import ssd_512
+from models.ssd512 import ssd_512
 from utils.object_detection_2d_data_generator import DataGenerator
 from utils.average_precision_evaluator import Evaluator
 from utils.coco_utils import get_coco_category_maps, predict_all_to_json
@@ -76,8 +76,6 @@ class SSD512():
             pred = ssd_512(self.X, self.weights,
                            image_size=(512, 512, 3),
                            n_classes=20 if dataset == 'voc2007' else 80,
-                           mode='inference',
-                           l2_regularization=0.0005,
                            scales=[0.07, 0.15, 0.3, 0.45,
                                    0.6, 0.75, 0.9, 1.05] if dataset == 'voc2007' else [0.04, 0.1, 0.26,
                                                                                        0.42, 0.58, 0.74, 0.9, 1.06],
@@ -120,9 +118,8 @@ if __name__ == '__main__':
     if args.model in ['yolo320', 'yolo416', 'yolo608'] and args.eval_dataset == 'voc2007':
         raise ValueError('YOLO model is trained on COCO so that YOLO only can be evaluated with COCO!')
 
-    batch_szie = 20
     if args.eval_dataset == 'voc2007':
-
+        batch_szie = 8
         img_height = int(args.model[-3:])
         img_width = img_height
         n_classes = 20
@@ -158,7 +155,7 @@ if __name__ == '__main__':
 
         results = evaluator(img_height=img_height,
                             img_width=img_width,
-                            batch_size=8,
+                            batch_size=batch_szie,
                             data_generator_mode='resize',
                             round_confidences=False,
                             matching_iou_threshold=0.5,
@@ -180,6 +177,7 @@ if __name__ == '__main__':
         print("{:<14}{:<6}{}".format('', 'mAP', round(mean_average_precision, 3)))
 
     elif args.eval_dataset == 'coco':
+        batch_szie = 20
         img_height = int(args.model[-3:])
         img_width = img_height
         n_classes = 80
