@@ -8,7 +8,6 @@ sys.path.append('../')
 def weight_loader(weight_file, by_name=False):
     assert by_name, 'argument by_name must be true!'
     weights = {}
-    scale = {}
     f = h5py.File(weight_file, mode='r')
     # f = f['model_weights']
     try:
@@ -21,4 +20,4 @@ def weight_loader(weight_file, by_name=False):
             weight_value = g[weight_name].value
             name = str(weight_name).split("'")[1]
             weights[name] = weight_value
-    return weights, scale
+    return weights
