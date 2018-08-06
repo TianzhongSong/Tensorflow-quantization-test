@@ -36,7 +36,7 @@ if __name__ == '__main__':
     weights = weight_loader(weights_file)
 
     X = tf.placeholder(tf.float32, [None, 256, 256, 3])
-    Y = tf.placeholder(tf.float32, [None, 1000, args.nClasses])
+    Y = tf.placeholder(tf.float32, [None, 256*256, args.nClasses])
     with tf.device('/gpu:0'):
         if args.model == 'unet':
             logits = unet.Unet(X, weights, n_classes, input_height=input_height, input_width=input_width)
@@ -61,7 +61,7 @@ if __name__ == '__main__':
                 pt_img = np.zeros_like(y)
                 gt_img[:] += (gt[:] == c).astype('uint8')
                 pt_img[:] += (gt[:] == c).astype('uint8')
-                if not (pt_img == np.zeros_like(pt_img)).all():
+                if not (pt_img == np.zeros_like(pt_img)).all() or not (gt_img == np.zeros_like(gt_img)).all():
                     iou[c - 1] += compute_iou(pt_img[0], gt_img[0])
                     count[c - 1] += 1
         miou = 0.
