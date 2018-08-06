@@ -14,16 +14,17 @@ def batch_norm(x, mean, variance, offset=None, scale=None):
     return tf.nn.batch_normalization(x, mean, variance, offset, scale, variance_epsilon=1e-3)
 
 
-def conv_2d(x, w, b=None, strides=1, padding='SAME', activation=''):
+def conv_2d(x, w, b=None, strides=1, padding='SAME', dilations=[1,1,1,1], activation=''):
     '''
     2D convolution with quantization (float32-->int8)
     '''
     x, sx = quantize(x)
     w, sw = quantize(w)
-    # Actually, convolution using float32, because of tensorflow does not support int8 conv op
+    # Actually, convolution compute using float32,
+    # because of tensorflow has not supported int8 conv op.
     x = tf.cast(x, dtype=tf.float32)
     w = tf.cast(w, dtype=tf.float32)
-    x = tf.nn.conv2d(x, w, strides=[1, strides, strides, 1], padding=padding)
+    x = tf.nn.conv2d(x, w, strides=[1, strides, strides, 1], padding=padding, dilations=dilations)
     # multiply scales
     x = tf.multiply(x, tf.multiply(sx, sw))
     if b is not None:
@@ -34,13 +35,12 @@ def conv_2d(x, w, b=None, strides=1, padding='SAME', activation=''):
 
 
 def depthwise_conv2d(x, w, b=None, strides=1, padding='SAME', activation=''):
-    # x, sx = quantize(x)
-    #vw, sw = quantize(w)
-    #x = tf.cast(x, dtype=tf.float32)
-    #w = tf.cast(w, dtype=tf.float32)
+    x, sx = quantize(x)
+    w, sw = quantize(w)
+    x = tf.cast(x, dtype=tf.float32)
+    w = tf.cast(w, dtype=tf.float32)
     x = tf.nn.depthwise_conv2d(x, w, strides=[1, strides, strides, 1], padding=padding)
-    # multiply scales
-    #x = tf.multiply(x, tf.multiply(sx, sw))
+    x = tf.multiply(x, tf.multiply(sx, sw))
     if b is not None:
         x = tf.nn.bias_add(x, b)
     if activation == 'relu':
@@ -76,7 +76,7 @@ def denselayer(x, w, b, activation=''):
     return x
 
 
-def maxpool_2d(x, k=2, s=2, padding='SAME'):
+def maxpool_2d(x, k=2, s=2, padding='VALID'):
     # MaxPool2D wrapper
     return tf.nn.max_pool(x, ksize=[1, k, k, 1], strides=[1, s, s, 1],
                           padding=padding)
