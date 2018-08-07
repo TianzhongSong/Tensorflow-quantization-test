@@ -24,7 +24,7 @@ class SSD300():
         self.sess = tf.Session()
         self.X = tf.placeholder(tf.float32, [None, 300, 300, 3])
         self.Y = tf.placeholder(tf.float32, [None, 200, 6])
-        self.weights = weight_loader(weight_path)
+        self.weights = weight_loader(weight_path, by_name=True)
         self.batch_size = batch_szie
         self.predictions = self.generate(dataset)
 
@@ -67,7 +67,7 @@ class SSD512():
         self.sess = tf.Session()
         self.X = tf.placeholder(tf.float32, [None, 512, 512, 3])
         self.Y = tf.placeholder(tf.float32, [None, 200, 6])
-        self.weights = weight_loader(weight_path)
+        self.weights = weight_loader(weight_path, by_name=True)
         self.batch_size = batch_szie
         self.predictions = self.generate(dataset)
 
