@@ -1,6 +1,6 @@
 from utils.layers import conv_2d, maxpool_2d
 import tensorflow as tf
-from tensorflow.python.keras.layers import UpSampling2D
+from tensorflow.python.keras.layers import UpSampling2D, Permute
 import numpy as np
 
 
@@ -100,5 +100,5 @@ def Unet(inputs, weights, n_classes, input_height, input_width):
     w, b, s = get_weights_biases_scale(weights, 'conv2d_21/kernel:0', 'conv2d_21/bias:0')
     conv11 = conv_2d(conv10, w, b, s, activation='relu')
     conv11 = tf.reshape(conv11, shape=[n_classes, input_height * input_width])
-    conv11 = tf.transpose(conv11)
+    conv11 = Permute((2, 1))(conv11)
     return conv11
