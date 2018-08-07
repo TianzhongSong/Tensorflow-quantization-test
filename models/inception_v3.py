@@ -1,14 +1,31 @@
 from utils.layers import *
 import tensorflow as tf
+import numpy as np
 
 
-def get_weights(weights, weight_name, bias_name):
-    w = tf.constant(weights[weight_name], dtype=tf.float32)
+def quantize(weights):
+    abs_weights = np.abs(weights)
+    vmax = np.max(abs_weights)
+    s = vmax / 127.
+    qweights = weights / s
+    qweights = np.round(qweights)
+    qweights = qweights.astype(np.int8)
+    return qweights, s
+
+
+def get_weights(weights, weight_name, bias_name='bbb', quant=True):
+    w = weights[weight_name]
+    if quant:
+        w, s = quantize(w)
+        w = tf.constant(w, dtype=tf.float32)
+    else:
+        w = tf.constant(weights[weight_name], dtype=tf.float32)
+        s = 0.
     try:
         b = tf.constant(weights[bias_name], dtype=tf.float32)
     except:
         b = None
-    return w, b
+    return w, b, s
 
 
 def get_bn_param(weights, mean, std, beta):
@@ -26,8 +43,8 @@ def conv2d_bn(x, layer_count, weights, strides=1, padding='SAME'):
     bias_name = 'conv2d_' + str(layer_count) + '/bias:0'
 
     layer_count += 1
-    w, b = get_weights(weights, conv_name, bias_name)
-    x = conv_2d(x, w, b, strides=strides, padding=padding)
+    w, b, s = get_weights(weights, conv_name, bias_name)
+    x = conv_2d(x, w, b, s, strides=strides, padding=padding)
 
     mean, std, beta = get_bn_param(weights, bn_mean, bn_var, bn_beta)
     x = batch_norm(x, mean, std, beta)
@@ -43,11 +60,11 @@ def InceptionV3(img_input, weights):
     x, layer_count = conv2d_bn(x, layer_count, weights, strides=2, padding='VALID')
     x, layer_count = conv2d_bn(x, layer_count, weights, strides=1, padding='VALID')
     x, layer_count = conv2d_bn(x, layer_count, weights)
-    x = maxpool_2d(x, k=3, s=2)
+    x = maxpool_2d(x, k=3, s=2, padding='SAME')
 
     x, layer_count = conv2d_bn(x, layer_count, weights, strides=1, padding='VALID')
     x, layer_count = conv2d_bn(x, layer_count, weights, strides=1, padding='VALID')
-    x = maxpool_2d(x, k=3, s=2)
+    x = maxpool_2d(x, k=3, s=2, padding='SAME')
 
     # mixed 0, 1, 2: 35 x 35 x 256
     branch1x1, layer_count = conv2d_bn(x, layer_count, weights)
@@ -187,9 +204,8 @@ def InceptionV3(img_input, weights):
         x = tf.concat([branch1x1, branch3x3, branch3x3dbl, branch_pool], axis=3)
 
     x = avgpool_2d(x, k=8)
-    w = tf.constant(weights['predictions/kernel:0'], dtype=tf.float32)
-    b = tf.constant(weights['predictions/bias:0'], dtype=tf.float32)
+    w, b, s = get_weights(weights, 'predictions/kernel:0', 'predictions/bias:0')
     x = tf.reshape(x, [-1, w.get_shape().as_list()[0]])
-    x = denselayer(x, w, b)
+    x = denselayer(x, w, b, s)
 
     return x
