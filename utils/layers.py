@@ -6,7 +6,7 @@ def quantize(x):
     vmax = tf.reduce_max(abs_value)
     s = tf.divide(vmax, 127.)
     x = tf.divide(x, s)
-    x = tf.round(x)
+    x = tf.rint(x)
     return x, s
 
 
