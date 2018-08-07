@@ -1,14 +1,31 @@
 from utils.layers import *
 import tensorflow as tf
+import numpy as np
 
 
-def get_weights(weights, weight_name, bias_name='bbb'):
-    w = tf.constant(weights[weight_name], dtype=tf.float32)
+def quantize(weights):
+    abs_weights = np.abs(weights)
+    vmax = np.max(abs_weights)
+    s = vmax / 127.
+    qweights = weights / s
+    qweights = np.round(qweights)
+    qweights = qweights.astype(np.int8)
+    return qweights, s
+
+
+def get_weights_biases(weights, weight_name, bias_name='bbb', quant=True):
+    w = weights[weight_name]
+    if quant:
+        w, s = quantize(w)
+        w = tf.constant(w, dtype=tf.float32)
+    else:
+        w = tf.constant(weights[weight_name], dtype=tf.float32)
+        s = 0.
     try:
         b = tf.constant(weights[bias_name], dtype=tf.float32)
     except:
         b = None
-    return w, b
+    return w, b, s
 
 
 def get_bn_param(weights, layer_num):
@@ -27,8 +44,8 @@ def get_bn_param(weights, layer_num):
 def conv_block(x, weights, conv_num, bn_num, strides=1, padding='SAME', activation=True):
     conv_name = 'convolution2d_{}_W:0'.format(conv_num)
     bias_name = 'convolution2d_{}_b:0'.format(conv_num)
-    w, b = get_weights(weights, conv_name, bias_name)
-    x = conv_2d(x, w, None, strides=strides, padding=padding)
+    w, b, s = get_weights_biases(weights, conv_name, bias_name)
+    x = conv_2d(x, w, None, s, strides=strides, padding=padding)
     mean, std, beta, gamma = get_bn_param(weights, bn_num)
     x = batch_norm(x, mean, std, beta, gamma)
     if activation:
@@ -42,10 +59,10 @@ def separable_conv_block(x, weights, sep_num, bn_num, strides=1, padding='SAME',
     dw_name = 'separableconvolution2d_{}_depthwise_kernel:0'.format(sep_num)
     pw_name = 'separableconvolution2d_{}_pointwise_kernel:0'.format(sep_num)
 
-    dw, b = get_weights(weights, dw_name)
-    pw, b = get_weights(weights, pw_name)
+    dw, b, ds = get_weights_biases(weights, dw_name)
+    pw, b, ps = get_weights_biases(weights, pw_name)
 
-    x = separable_conv2d(x, dw, pw, strides=strides, padding=padding)
+    x = separable_conv2d(x, dw, pw, ds, ps, strides=strides, padding=padding)
     mean, std, beta, gamma = get_bn_param(weights, bn_num)
     x = batch_norm(x, mean, std, beta, gamma)
     if activation:
@@ -106,8 +123,8 @@ def Xception(x, weights):
     x, sepconv_count, bn_count = separable_conv_block(x, weights, sepconv_count, bn_count)
 
     x = avgpool_2d(x, k=8)
-    w = tf.constant(weights['dense_2_W:0'], dtype=tf.float32)
-    b = tf.constant(weights['dense_2_b:0'], dtype=tf.float32)
+
+    w, b, s = get_weights_biases(weights, 'dense_2_W:0', 'dense_2_b:0')
     x = tf.reshape(x, [-1, w.get_shape().as_list()[0]])
-    x = denselayer(x, w, b)
+    x = denselayer(x, w, b, s)
     return x
