@@ -1,11 +1,31 @@
 from utils.layers import *
 import tensorflow as tf
+import numpy as np
 
 
-def get_weights_biases_scale(weights, weight_name, bias_name):
-    w = tf.constant(weights[weight_name], dtype=tf.float32)
-    b = tf.constant(weights[bias_name], dtype=tf.float32)
-    return w, b
+def quantize(weights):
+    abs_weights = np.abs(weights)
+    vmax = np.max(abs_weights)
+    s = vmax / 127.
+    qweights = weights / s
+    qweights = np.round(qweights)
+    qweights = qweights.astype(np.int8)
+    return qweights, s
+
+
+def get_weights_biases_scale(weights, weight_name, bias_name='bbb', quant=True):
+    w = weights[weight_name]
+    if quant:
+        w, s = quantize(w)
+        w = tf.constant(w, dtype=tf.float32)
+    else:
+        w = tf.constant(weights[weight_name], dtype=tf.float32)
+        s = 0.
+    try:
+        b = tf.constant(weights[bias_name], dtype=tf.float32)
+    except:
+        b = None
+    return w, b, s
 
 
 def get_bn_param(weights, mean, std, beta, gamma):
@@ -24,9 +44,9 @@ def identity_block(inputs, weights, stage, block):
     conv_names = ['2a', '2b', '2c']
 
     conv = conv_name_base + conv_names[0]
-    w, b = get_weights_biases_scale(weights,
+    w, b, s = get_weights_biases_scale(weights,
                                     conv + conv_wb[0], conv + conv_wb[1])
-    x = conv_2d(inputs, w, b)
+    x = conv_2d(inputs, w, b, s)
     bn = bn_name_base + conv_names[0]
     mean, std, beta, gamma = get_bn_param(weights, bn + bn_params[0],
                                           bn + bn_params[1], bn + bn_params[2], bn + bn_params[3])
@@ -35,9 +55,9 @@ def identity_block(inputs, weights, stage, block):
 
     for i in range(1, 3):
         conv = conv_name_base + conv_names[i]
-        w, b = get_weights_biases_scale(weights,
+        w, b, s = get_weights_biases_scale(weights,
                                            conv + conv_wb[0], conv + conv_wb[1])
-        x = conv_2d(x, w, b)
+        x = conv_2d(x, w, b, s)
         bn = bn_name_base + conv_names[i]
         mean, std, beta, gamma = get_bn_param(weights, bn + bn_params[0],
                                               bn + bn_params[1], bn + bn_params[2], bn + bn_params[3])
@@ -56,9 +76,9 @@ def conv_block(inputs, weights, stage, block, strides=2):
     conv_names = ['2a', '2b', '2c']
 
     conv = conv_name_base + conv_names[0]
-    w, b = get_weights_biases_scale(weights,
+    w, b, s = get_weights_biases_scale(weights,
                                     conv + conv_wb[0], conv + conv_wb[1])
-    x = conv_2d(inputs, w, b, strides=strides)
+    x = conv_2d(inputs, w, b, s, strides=strides)
     bn = bn_name_base + conv_names[0]
     mean, std, beta, gamma = get_bn_param(weights, bn + bn_params[0],
                                           bn + bn_params[1], bn + bn_params[2], bn + bn_params[3])
@@ -67,9 +87,9 @@ def conv_block(inputs, weights, stage, block, strides=2):
 
     for i in range(1, 3):
         conv = conv_name_base + conv_names[i]
-        w, b = get_weights_biases_scale(weights,
+        w, b, s = get_weights_biases_scale(weights,
                                            conv + conv_wb[0], conv + conv_wb[1])
-        x = conv_2d(x, w, b)
+        x = conv_2d(x, w, b, s)
         bn = bn_name_base + conv_names[i]
         mean, std, beta, gamma = get_bn_param(weights, bn + bn_params[0],
                                               bn + bn_params[1], bn + bn_params[2], bn + bn_params[3])
@@ -78,9 +98,9 @@ def conv_block(inputs, weights, stage, block, strides=2):
             x = tf.nn.relu(x)
 
     # shortcut
-    w, b = get_weights_biases_scale(weights,
+    w, b, s = get_weights_biases_scale(weights,
                                        conv_name_base + '1_W:0', conv_name_base + '1_b:0')
-    shortcut = conv_2d(inputs, w, b, strides=strides)
+    shortcut = conv_2d(inputs, w, b, s, strides=strides)
     bn = bn_name_base + '1'
     mean, std, beta, gamma = get_bn_param(weights, bn + bn_params[0],
                                           bn + bn_params[1], bn + bn_params[2], bn + bn_params[3])
@@ -92,8 +112,8 @@ def conv_block(inputs, weights, stage, block, strides=2):
 def ResNet50(x, weights):
     # init convolution
     x = tf.reshape(x, shape=[-1, 224, 224, 3])
-    w, b = get_weights_biases_scale(weights, 'conv1_W:0', 'conv1_b:0')
-    x = conv_2d(x, w, b, strides=2)
+    w, b, s = get_weights_biases_scale(weights, 'conv1_W:0', 'conv1_b:0')
+    x = conv_2d(x, w, b, s, strides=2)
     mean, std, beta, gamma = get_bn_param(weights, 'bn_conv1_running_mean:0',
                                           'bn_conv1_running_std:0', 'bn_conv1_beta:0', 'bn_conv1_gamma:0')
     x = batch_norm(x, mean, std, beta, gamma)
@@ -122,8 +142,7 @@ def ResNet50(x, weights):
 
     x = avgpool_2d(x, k=7)
 
-    w = tf.constant(weights['fc1000_W:0'], dtype=tf.float32)
-    b = tf.constant(weights['fc1000_b:0'], dtype=tf.float32)
+    w, b, s = get_weights_biases_scale(weights, 'fc1000_W:0', 'fc1000_b:0')
     x = tf.reshape(x, [-1, w.get_shape().as_list()[0]])
-    x = denselayer(x, w, b)
+    x = denselayer(x, w, b, s)
     return x
