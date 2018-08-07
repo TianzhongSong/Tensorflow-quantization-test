@@ -288,7 +288,7 @@ def ssd_300(inputs,
     conv5_2 = conv_2d(conv5_1, w, b, activation='relu')
     w, b = get_weights_biases(weights, 'conv5_3/kernel:0', 'conv5_3/bias:0')
     conv5_3 = conv_2d(conv5_2, w, b, activation='relu')
-    pool5 = maxpool_2d(conv5_3, padding='SAME')
+    pool5 = maxpool_2d(conv5_3, k=3, s=1, padding='SAME')
 
     w, b = get_weights_biases(weights, 'fc6/kernel:0', 'fc6/bias:0')
     # todo: verify dilations
