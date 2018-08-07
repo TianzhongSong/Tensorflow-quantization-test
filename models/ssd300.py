@@ -6,13 +6,38 @@ import numpy as np
 import tensorflow as tf
 
 
-def get_weights_biases(weights, weight_name, bias_name):
-    w = tf.constant(weights[weight_name], dtype=tf.float32)
+def quantize(weights):
+    abs_weights = np.abs(weights)
+    vmax = np.max(abs_weights)
+    s = vmax / 127.
+    qweights = weights / s
+    qweights = np.round(qweights)
+    qweights = qweights.astype(np.int8)
+    return qweights, s
+
+
+def get_weights_biases(weights, weight_name, bias_name='bbb', quant=True):
+    w = weights[weight_name]
+    if quant:
+        w, s = quantize(w)
+        w = tf.constant(w, dtype=tf.float32)
+    else:
+        w = tf.constant(weights[weight_name], dtype=tf.float32)
+        s = 0.
     try:
         b = tf.constant(weights[bias_name], dtype=tf.float32)
     except:
         b = None
-    return w, b
+    return w, b, s
+
+
+# def get_weights_biases(weights, weight_name, bias_name):
+#     w = tf.constant(weights[weight_name], dtype=tf.float32)
+#     try:
+#         b = tf.constant(weights[bias_name], dtype=tf.float32)
+#     except:
+#         b = None
+#     return w, b
 
 
 def L2Normalization(x, gamma):
@@ -254,115 +279,114 @@ def ssd_300(inputs,
     if swap_channels:
         x1 = Lambda(input_channel_swap, output_shape=(img_height, img_width, img_channels), name='input_channel_swap')(x1)
 
-    w, b = get_weights_biases(weights, 'conv1_1/kernel:0', 'conv1_1/bias:0')
-    conv1_1 = conv_2d(x1, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv1_2/kernel:0', 'conv1_2/bias:0')
-    conv1_2 = conv_2d(conv1_1, w, b, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv1_1/kernel:0', 'conv1_1/bias:0')
+    conv1_1 = conv_2d(x1, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv1_2/kernel:0', 'conv1_2/bias:0')
+    conv1_2 = conv_2d(conv1_1, w, b, s, activation='relu')
     pool1 = maxpool_2d(conv1_2, padding='SAME')
 
-    w, b = get_weights_biases(weights, 'conv2_1/kernel:0', 'conv2_1/bias:0')
-    conv2_1 = conv_2d(pool1, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv2_2/kernel:0', 'conv2_2/bias:0')
-    conv2_2 = conv_2d(conv2_1, w, b, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv2_1/kernel:0', 'conv2_1/bias:0')
+    conv2_1 = conv_2d(pool1, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv2_2/kernel:0', 'conv2_2/bias:0')
+    conv2_2 = conv_2d(conv2_1, w, b, s, activation='relu')
     pool2 = maxpool_2d(conv2_2, padding='SAME')
 
-    w, b = get_weights_biases(weights, 'conv3_1/kernel:0', 'conv3_1/bias:0')
-    conv3_1 = conv_2d(pool2, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv3_2/kernel:0', 'conv3_2/bias:0')
-    conv3_2 = conv_2d(conv3_1, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv3_3/kernel:0', 'conv3_3/bias:0')
-    conv3_3 = conv_2d(conv3_2, w, b, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv3_1/kernel:0', 'conv3_1/bias:0')
+    conv3_1 = conv_2d(pool2, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv3_2/kernel:0', 'conv3_2/bias:0')
+    conv3_2 = conv_2d(conv3_1, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv3_3/kernel:0', 'conv3_3/bias:0')
+    conv3_3 = conv_2d(conv3_2, w, b, s, activation='relu')
     pool3 = maxpool_2d(conv3_3, padding='SAME')
 
-    w, b = get_weights_biases(weights, 'conv4_1/kernel:0', 'conv4_1/bias:0')
-    conv4_1 = conv_2d(pool3, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv4_2/kernel:0', 'conv4_2/bias:0')
-    conv4_2 = conv_2d(conv4_1, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv4_3/kernel:0', 'conv4_3/bias:0')
-    conv4_3 = conv_2d(conv4_2, w, b, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv4_1/kernel:0', 'conv4_1/bias:0')
+    conv4_1 = conv_2d(pool3, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv4_2/kernel:0', 'conv4_2/bias:0')
+    conv4_2 = conv_2d(conv4_1, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv4_3/kernel:0', 'conv4_3/bias:0')
+    conv4_3 = conv_2d(conv4_2, w, b, s, activation='relu')
     pool4 = maxpool_2d(conv4_3, padding='SAME')
 
-    w, b = get_weights_biases(weights, 'conv5_1/kernel:0', 'conv5_1/bias:0')
-    conv5_1 = conv_2d(pool4, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv5_2/kernel:0', 'conv5_2/bias:0')
-    conv5_2 = conv_2d(conv5_1, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv5_3/kernel:0', 'conv5_3/bias:0')
-    conv5_3 = conv_2d(conv5_2, w, b, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv5_1/kernel:0', 'conv5_1/bias:0')
+    conv5_1 = conv_2d(pool4, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv5_2/kernel:0', 'conv5_2/bias:0')
+    conv5_2 = conv_2d(conv5_1, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv5_3/kernel:0', 'conv5_3/bias:0')
+    conv5_3 = conv_2d(conv5_2, w, b, s, activation='relu')
     pool5 = maxpool_2d(conv5_3, k=3, s=1, padding='SAME')
 
-    w, b = get_weights_biases(weights, 'fc6/kernel:0', 'fc6/bias:0')
-    # todo: verify dilations
-    fc6 = conv_2d(pool5, w, b, dilations=[1, 6, 6, 1], activation='relu')
-    w, b = get_weights_biases(weights, 'fc7/kernel:0', 'fc7/bias:0')
-    fc7 = conv_2d(fc6, w, b, activation='relu')
+    w, b, s = get_weights_biases(weights, 'fc6/kernel:0', 'fc6/bias:0')
+    fc6 = conv_2d(pool5, w, b, s, dilations=[1, 6, 6, 1], activation='relu')
+    w, b, s = get_weights_biases(weights, 'fc7/kernel:0', 'fc7/bias:0')
+    fc7 = conv_2d(fc6, w, b, s, activation='relu')
 
-    w, b = get_weights_biases(weights, 'conv6_1/kernel:0', 'conv6_1/bias:0')
-    conv6_1 = conv_2d(fc7, w, b, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv6_1/kernel:0', 'conv6_1/bias:0')
+    conv6_1 = conv_2d(fc7, w, b, s, activation='relu')
     conv6_1 = ZeroPadding2D(padding=((1, 1), (1, 1)))(conv6_1)
-    w, b = get_weights_biases(weights, 'conv6_2/kernel:0', 'conv6_2/bias:0')
-    conv6_2 = conv_2d(conv6_1, w, b, strides=2, activation='relu', padding='VALID')
+    w, b, s = get_weights_biases(weights, 'conv6_2/kernel:0', 'conv6_2/bias:0')
+    conv6_2 = conv_2d(conv6_1, w, b, s, strides=2, activation='relu', padding='VALID')
 
-    w, b = get_weights_biases(weights, 'conv7_1/kernel:0', 'conv7_1/bias:0')
-    conv7_1 = conv_2d(conv6_2, w, b, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv7_1/kernel:0', 'conv7_1/bias:0')
+    conv7_1 = conv_2d(conv6_2, w, b, s, activation='relu')
     conv7_1 = ZeroPadding2D(padding=((1, 1), (1, 1)))(conv7_1)
-    w, b = get_weights_biases(weights, 'conv7_2/kernel:0', 'conv7_2/bias:0')
-    conv7_2 = conv_2d(conv7_1, w, b, strides=2, activation='relu', padding='VALID')
+    w, b, s = get_weights_biases(weights, 'conv7_2/kernel:0', 'conv7_2/bias:0')
+    conv7_2 = conv_2d(conv7_1, w, b, s, strides=2, activation='relu', padding='VALID')
 
-    w, b = get_weights_biases(weights, 'conv8_1/kernel:0', 'conv8_1/bias:0')
-    conv8_1 = conv_2d(conv7_2, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv8_2/kernel:0', 'conv8_2/bias:0')
-    conv8_2 = conv_2d(conv8_1, w, b, activation='relu', padding='VALID')
+    w, b, s = get_weights_biases(weights, 'conv8_1/kernel:0', 'conv8_1/bias:0')
+    conv8_1 = conv_2d(conv7_2, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv8_2/kernel:0', 'conv8_2/bias:0')
+    conv8_2 = conv_2d(conv8_1, w, b, s, activation='relu', padding='VALID')
 
-    w, b = get_weights_biases(weights, 'conv9_1/kernel:0', 'conv9_1/bias:0')
-    conv9_1 = conv_2d(conv8_2, w, b, activation='relu')
-    w, b = get_weights_biases(weights, 'conv9_2/kernel:0', 'conv9_2/bias:0')
-    conv9_2 = conv_2d(conv9_1, w, b, activation='relu', padding='VALID')
+    w, b, s = get_weights_biases(weights, 'conv9_1/kernel:0', 'conv9_1/bias:0')
+    conv9_1 = conv_2d(conv8_2, w, b, s, activation='relu')
+    w, b, s = get_weights_biases(weights, 'conv9_2/kernel:0', 'conv9_2/bias:0')
+    conv9_2 = conv_2d(conv9_1, w, b, s, activation='relu', padding='VALID')
 
     # Feed conv4_3 into the L2 normalization layer
-    w, b = get_weights_biases(weights, 'conv4_3_norm/weights_0:0', 'conv4_3_norm/weights_0:0')
+    w, b, s = get_weights_biases(weights, 'conv4_3_norm/weights_0:0', 'conv4_3_norm/weights_0:0', quant=False)
     conv4_3_norm = L2Normalization(conv4_3, w)
 
     # Build the convolutional predictor layers on top of the base network
 
     # We precidt `n_classes` confidence values for each box, hence the confidence predictors have depth `n_boxes * n_classes`
     # Output shape of the confidence layers: `(batch, height, width, n_boxes * n_classes)`
-    w, b = get_weights_biases(weights, 'conv4_3_norm_mbox_conf/kernel:0', 'conv4_3_norm_mbox_conf/bias:0')
-    conv4_3_norm_mbox_conf = conv_2d(conv4_3_norm, w, b)
+    w, b, s = get_weights_biases(weights, 'conv4_3_norm_mbox_conf/kernel:0', 'conv4_3_norm_mbox_conf/bias:0')
+    conv4_3_norm_mbox_conf = conv_2d(conv4_3_norm, w, b, s)
 
-    w, b = get_weights_biases(weights, 'fc7_mbox_conf/kernel:0', 'fc7_mbox_conf/bias:0')
-    fc7_mbox_conf = conv_2d(fc7, w, b)
+    w, b, s = get_weights_biases(weights, 'fc7_mbox_conf/kernel:0', 'fc7_mbox_conf/bias:0')
+    fc7_mbox_conf = conv_2d(fc7, w, b, s)
 
-    w, b = get_weights_biases(weights, 'conv6_2_mbox_conf/kernel:0', 'conv6_2_mbox_conf/bias:0')
-    conv6_2_mbox_conf = conv_2d(conv6_2, w, b)
+    w, b, s = get_weights_biases(weights, 'conv6_2_mbox_conf/kernel:0', 'conv6_2_mbox_conf/bias:0')
+    conv6_2_mbox_conf = conv_2d(conv6_2, w, b, s)
 
-    w, b = get_weights_biases(weights, 'conv7_2_mbox_conf/kernel:0', 'conv7_2_mbox_conf/bias:0')
-    conv7_2_mbox_conf = conv_2d(conv7_2, w, b)
+    w, b, s = get_weights_biases(weights, 'conv7_2_mbox_conf/kernel:0', 'conv7_2_mbox_conf/bias:0')
+    conv7_2_mbox_conf = conv_2d(conv7_2, w, b, s)
 
-    w, b = get_weights_biases(weights, 'conv8_2_mbox_conf/kernel:0', 'conv8_2_mbox_conf/bias:0')
-    conv8_2_mbox_conf = conv_2d(conv8_2, w, b)
+    w, b, s = get_weights_biases(weights, 'conv8_2_mbox_conf/kernel:0', 'conv8_2_mbox_conf/bias:0')
+    conv8_2_mbox_conf = conv_2d(conv8_2, w, b, s)
 
-    w, b = get_weights_biases(weights, 'conv9_2_mbox_conf/kernel:0', 'conv9_2_mbox_conf/bias:0')
-    conv9_2_mbox_conf = conv_2d(conv9_2, w, b)
+    w, b, s = get_weights_biases(weights, 'conv9_2_mbox_conf/kernel:0', 'conv9_2_mbox_conf/bias:0')
+    conv9_2_mbox_conf = conv_2d(conv9_2, w, b, s)
 
     # We predict 4 box coordinates for each box, hence the localization predictors have depth `n_boxes * 4`
     # Output shape of the localization layers: `(batch, height, width, n_boxes * 4)`
-    w, b = get_weights_biases(weights, 'conv4_3_norm_mbox_loc/kernel:0', 'conv4_3_norm_mbox_loc/bias:0')
-    conv4_3_norm_mbox_loc = conv_2d(conv4_3_norm, w, b)
+    w, b, s = get_weights_biases(weights, 'conv4_3_norm_mbox_loc/kernel:0', 'conv4_3_norm_mbox_loc/bias:0')
+    conv4_3_norm_mbox_loc = conv_2d(conv4_3_norm, w, b, s)
 
-    w, b = get_weights_biases(weights, 'fc7_mbox_loc/kernel:0', 'fc7_mbox_loc/bias:0')
-    fc7_mbox_loc = conv_2d(fc7, w, b)
+    w, b, s = get_weights_biases(weights, 'fc7_mbox_loc/kernel:0', 'fc7_mbox_loc/bias:0')
+    fc7_mbox_loc = conv_2d(fc7, w, b, s)
 
-    w, b = get_weights_biases(weights, 'conv6_2_mbox_loc/kernel:0', 'conv6_2_mbox_loc/bias:0')
-    conv6_2_mbox_loc = conv_2d(conv6_2, w, b)
+    w, b, s = get_weights_biases(weights, 'conv6_2_mbox_loc/kernel:0', 'conv6_2_mbox_loc/bias:0')
+    conv6_2_mbox_loc = conv_2d(conv6_2, w, b, s)
 
-    w, b = get_weights_biases(weights, 'conv7_2_mbox_loc/kernel:0', 'conv7_2_mbox_loc/bias:0')
-    conv7_2_mbox_loc = conv_2d(conv7_2, w, b)
+    w, b, s = get_weights_biases(weights, 'conv7_2_mbox_loc/kernel:0', 'conv7_2_mbox_loc/bias:0')
+    conv7_2_mbox_loc = conv_2d(conv7_2, w, b, s)
 
-    w, b = get_weights_biases(weights, 'conv8_2_mbox_loc/kernel:0', 'conv8_2_mbox_loc/bias:0')
-    conv8_2_mbox_loc = conv_2d(conv8_2, w, b)
+    w, b, s = get_weights_biases(weights, 'conv8_2_mbox_loc/kernel:0', 'conv8_2_mbox_loc/bias:0')
+    conv8_2_mbox_loc = conv_2d(conv8_2, w, b, s)
 
-    w, b = get_weights_biases(weights, 'conv9_2_mbox_loc/kernel:0', 'conv9_2_mbox_loc/bias:0')
-    conv9_2_mbox_loc = conv_2d(conv9_2, w, b)
+    w, b, s = get_weights_biases(weights, 'conv9_2_mbox_loc/kernel:0', 'conv9_2_mbox_loc/bias:0')
+    conv9_2_mbox_loc = conv_2d(conv9_2, w, b, s)
 
     # Output shape of anchors: `(batch, height, width, n_boxes, 8)`
     conv4_3_norm_mbox_priorbox = AnchorBoxes(conv4_3_norm_mbox_loc, img_height, img_width, this_scale=scales[0],
