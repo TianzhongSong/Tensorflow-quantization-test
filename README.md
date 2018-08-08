@@ -307,9 +307,7 @@ SSD and YOLOv3 results on COCO val2017.
 
 ## Semantic Segmentation Part
 
-In this part, I evaluate semantic segmentation with float16 dtype.
-
-[U-net](https://arxiv.org/pdf/1505.04597.pdf) is adopted in this test.
+In this part, I evaluate semantic segmentation with [U-net](https://arxiv.org/pdf/1505.04597.pdf).
 
 [HumanParsing-Dataset](https://github.com/lemondan/HumanParsing-Dataset) is adopted in this test.
 
