@@ -5,8 +5,7 @@ import numpy as np
 sys.path.append('../')
 
 
-def weight_loader(weight_file, by_name=False):
-    assert by_name, 'argument by_name must be true!'
+def weight_loader(weight_file):
     weights = {}
     f = h5py.File(weight_file, mode='r')
     # f = f['model_weights']
