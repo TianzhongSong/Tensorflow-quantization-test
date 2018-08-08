@@ -259,6 +259,8 @@ SSD results on VOC2007 test set
   </tr>
 </table>
 
+The AP of each category can be found in this [doc](https://github.com/TianzhongSong/Tensorflow-quantization-test/blob/master/docs/ssd_results.md)
+
 SSD and YOLOv3 results on COCO val2017.
 
 <table width="95%">
