@@ -10,9 +10,7 @@ tensorflow==1.8.0
 
 opencv==3.2.0
 
-tqdm
-
-h5py
+pycocotools, BeautifulSoup4, lxml, tqdm, h5py
 
 ### Quantization Method
 
