@@ -216,14 +216,210 @@ Only quantize pointwise convolution in MobileNet
   </tr>
 </table>
 
-## Semantic Segmentation Part
-
-something to do
-
 ## Object Detection Part
 
-something to do
+### Usage
+
+Firstly, download [VOC2007 test set](http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar) and [COCO2017 val set](http://images.cocodataset.org/zips/val2017.zip), [COCO2017 val set annotations](http://images.cocodataset.org/annotations/annotations_trainval2017.zip) datasets, then extract them and modify the path in [script](https://github.com/TianzhongSong/keras-FP16-test/blob/master/eval_object_detection.py).
+
+Secondly, download SSD pre-trained weights and put them in 'weights' directory.
+
+[SSD300 VOC weights](https://drive.google.com/file/d/1fyDDUcIOSjeiP08vl1WCndcFdtboFXua/view), [SSD300 COCO weights](https://drive.google.com/open?id=1vmEF7FUsWfHquXyCqO17UaXOPpRbwsdj), [SSD512 VOC weights](https://drive.google.com/file/d/18nFnqv9fG5Rh_fx6vUtOoQHOLySt4fEx/view), [SSD512 COCO weights](https://drive.google.com/open?id=1IJWZKmjkcFMlvaz2gYukzFx4d6mH3py5)
+
+An example for evaluating SSD300 on VOC2007 test set
+
+    python eval_object_detection.py --model='ssd300' --eval-dataset='voc2007'
+
+### Results
+
+SSD results on VOC2007 test set
+
+<table width="95%">
+  <tr>
+    <td></td>
+    <td colspan=3 align=center>mAP</td>
+  </tr>
+  <tr>
+    <td align=center><b>Model</td>
+    <td align=center>float32</td>
+    <td align=center>quantized(int8)</td>
+    <td align=center>diff</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>SSD300</td>
+    <td align=center width="10%"><b>0.782</td>
+    <td align=center width="10%"><b>0.783</td>
+    <td align=center width="10%"><b>0.001</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>SSD512</td>
+    <td align=center width="10%"><b>0.91</td>
+    <td align=center width="10%"><b>0.909</td>
+    <td align=center width="10%"><b>-0.001</td>
+  </tr>
+</table>
+
+SSD and YOLOv3 results on COCO val2017.
+
+<table width="95%">
+  <tr>
+    <td></td>
+    <td colspan=3 align=center>mAP</td>
+  </tr>
+  <tr>
+    <td align=center><b>Model</td>
+    <td align=center>float32</td>
+    <td align=center>quantized(int8)</td>
+    <td align=center>diff</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>SSD300</td>
+    <td align=center width="10%"><b>0.424</td>
+    <td align=center width="10%"><b>0.423</td>
+    <td align=center width="10%"><b>-0.001</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>SSD512</td>
+    <td align=center width="10%"><b>0.481</td>
+    <td align=center width="10%"><b>0.478</td>
+    <td align=center width="10%"><b>-0.003</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>YOLO320</td>
+    <td align=center width="10%"><b>to do</td>
+    <td align=center width="10%"><b>to do</td>
+    <td align=center width="10%"><b>to do</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>YOLO416</td>
+    <td align=center width="10%"><b>to do</td>
+    <td align=center width="10%"><b>to do</td>
+    <td align=center width="10%"><b>to do</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>YOLO608</td>
+    <td align=center width="10%"><b>to do</td>
+    <td align=center width="10%"><b>to do</td>
+    <td align=center width="10%"><b>to do</td>
+  </tr>
+</table>
+
+
+## Semantic Segmentation Part
+
+In this part, I evaluate semantic segmentation with float16 dtype.
+
+[U-net](https://arxiv.org/pdf/1505.04597.pdf) is adopted in this test.
+
+[HumanParsing-Dataset](https://github.com/lemondan/HumanParsing-Dataset) is adopted in this test.
+
+The tested models are trained by my-self.
+Training details can be found in this repo: [Person-Segmentation-Keras](https://github.com/TianzhongSong/Person-Segmentation-Keras).
+
+### Usage
+
+For person segmentation (binary classification) task.
+
+    python eval_segmentation.py --model='unet' --nClasses=2
+    
+For human parsing (multi-class classification) task.
+
+    python eval_segmentation.py --model='unet' --nClasses=5
+
+### Results
+
+Person segmentation
+
+<table width="95%">
+  <tr>
+    <td></td>
+    <td colspan=3 align=center>mIoU</td>
+  </tr>
+  <tr>
+    <td align=center><b>Model</td>
+    <td align=center>float32</td>
+    <td align=center>quantized(int8)</td>
+    <td align=center>diff</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>Unet</td>
+    <td align=center width="10%"><b>0.8920</td>
+    <td align=center width="10%"><b>0.8868</td>
+    <td align=center width="10%"><b>-0.0052</td>
+  </tr>
+</table>
+
+Human parsing
+
+<table width="95%">
+  <tr>
+    <td></td>
+    <td></td>
+    <td colspan=3 align=center>mIoU</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td align=center><b>Part</td>
+    <td align=center>float32</td>
+    <td align=center>quantized(int8)</td>
+    <td align=center>diff</td>
+  </tr>
+  <tr>
+    <td rowspan=5 align=center width="10%"><b>Unet</td>
+    <td align=center width="10%"><b>head</td>
+    <td align=center width="10%"><b>0.66476</td>
+    <td align=center width="10%"><b>0.66409</td>
+    <td align=center width="10%"><b>-0.00067</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>upper body</td>
+    <td align=center width="10%"><b>0.48639</td>
+    <td align=center width="10%"><b>0.48618</td>
+    <td align=center width="10%"><b>0.00021</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>both hands</td>
+    <td align=center width="10%"><b>0.27016</td>
+    <td align=center width="10%"><b>0.26903</td>
+    <td align=center width="10%"><b>-0.00113</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>lower body</td>
+    <td align=center width="10%"><b>0.66536</td>
+    <td align=center width="10%"><b>0.66497</td>
+    <td align=center width="10%"><b>-0.00039</td>
+  </tr>
+  <tr>
+    <td align=center width="10%"><b>mean</td>
+    <td align=center width="10%"><b>0.52167</td>
+    <td align=center width="10%"><b>0.52107</td>
+    <td align=center width="10%"><b>-0.0006</td>
+  </tr>
+</table>
+
+
+### ToDo
+
+PointNet
+
 
 ## Reference
 
-something to do
+[deep learing models](https://github.com/fchollet/deep-learning-models)
+
+[DenseNet-Keras](https://github.com/flyyufelix/DenseNet-Keras)
+
+[keras-squeezenet](https://github.com/rcmalli/keras-squeezenet)
+
+[ssd_keras](https://github.com/pierluigiferrari/ssd_keras)
+
+[keras-yolo3](https://github.com/qqwweee/keras-yolo3)
+
+[SegNet-Tutorial](https://github.com/alexgkendall/SegNet-Tutorial)
+
+[Tensorflow-SegNet](https://github.com/tkuanlun350/Tensorflow-SegNet)
+
+[image-segmentation-keras](https://github.com/divamgupta/image-segmentation-keras)
+
+[keras-FP16-test](https://github.com/TianzhongSong/keras-FP16-test)
+
