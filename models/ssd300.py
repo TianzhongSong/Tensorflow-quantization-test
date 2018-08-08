@@ -1,6 +1,6 @@
 from utils.layers import *
 from ssd_layers.ssd_AchorBoxes import AnchorBoxes
-from ssd_layers.keras_layer_DecodeDetections import DecodeDetections
+from ssd_layers.ssd_DecodeDetections import DecodeDetections
 from tensorflow.python.keras.layers import Concatenate, Reshape, ZeroPadding2D, Lambda
 import numpy as np
 import tensorflow as tf
@@ -492,13 +492,13 @@ def ssd_300(inputs,
     # Output shape of `predictions`: (batch, n_boxes_total, n_classes + 4 + 8)
     predictions = Concatenate(axis=2, name='predictions')([mbox_conf_softmax, mbox_loc, mbox_priorbox])
 
-    decoded_predictions = DecodeDetections(confidence_thresh=confidence_thresh,
+    decoded_predictions = DecodeDetections(predictions,
+                                           confidence_thresh=confidence_thresh,
                                            iou_threshold=iou_threshold,
                                            top_k=top_k,
                                            nms_max_output_size=nms_max_output_size,
                                            coords=coords,
                                            normalize_coords=normalize_coords,
                                            img_height=img_height,
-                                           img_width=img_width,
-                                           name='decoded_predictions')(predictions)
+                                           img_width=img_width)
     return decoded_predictions
