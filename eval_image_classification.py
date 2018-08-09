@@ -32,7 +32,7 @@ if __name__ == '__main__':
     args = parse.parse_args()
 
     model_name = args.model if args.model != 'mobilenet' else args.model + '_' + str(args.alpha)
-    weights = weight_loader('./weights/{}'.format(model_name))
+    weights = weight_loader('./weights/{}'.format(weights[model_name]))
 
     if args.model in ['vgg', 'resnet', 'mobilenet']:
         X = tf.placeholder(tf.float32, [None, 224, 224, 3])
